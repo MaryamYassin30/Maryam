@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-// from app/signin/ to lib/ is ../../
-import { supabase } from '../../lib/supabaseClient';
+// ⬇️ If your client file lives somewhere else, keep your existing path.
+import { supabase } from '@/lib/supabaseClient';
 
 export default function SignInPage() {
-  const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErr('');
     setMsg('');
@@ -22,29 +22,29 @@ export default function SignInPage() {
       if (mode === 'signin') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        setMsg('Signed in! If you have Confirm Email on, verify once first.');
+        setMsg('Signed in! Taking you home...');
+        window.location.href = '/';
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            // after confirming email, user returns to your site
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/signin`,
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/`,
           },
         });
         if (error) throw error;
-        setMsg('Check your email to confirm your account, then sign in.');
+        setMsg('Check your email to confirm your account.');
       }
-    } catch (e) {
-      setErr(e?.message || 'Something went wrong');
+    } catch (e: any) {
+      setErr(e.message ?? 'Something went wrong');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="max-w-md mx-auto mt-16 p-6 border rounded-xl shadow-sm">
-      <h1 className="text-2xl font-semibold mb-6">
+    <main className="max-w-md mx-auto mt-16 p-6 border rounded-xl shadow">
+      <h1 className="text-2xl font-semibold mb-4">
         {mode === 'signin' ? 'Sign in' : 'Create account'}
       </h1>
 
@@ -57,7 +57,6 @@ export default function SignInPage() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-
         <input
           type="password"
           placeholder="Password"
@@ -72,7 +71,7 @@ export default function SignInPage() {
           disabled={loading || !email || !password}
           className="w-full px-4 py-2 bg-black text-white rounded-lg disabled:opacity-60"
         >
-          {loading ? 'Please wait…' : (mode === 'signin' ? 'Sign in' : 'Sign up')}
+          {loading ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Sign up'}
         </button>
 
         {err && <p className="text-red-600 text-sm">{err}</p>}
