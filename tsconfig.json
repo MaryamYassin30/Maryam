@@ -36,9 +36,12 @@
     "components",
     "lib",
     "tests",
-    "types/**/*.ts"
-, "types/app/page.tsx"  ],
+    "types/**/*.ts",
+    "types/app/page.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": [
-    "node_modules", ".next"
+    "node_modules",
+    ".next"
   ]
 }
