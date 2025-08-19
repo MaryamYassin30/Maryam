@@ -1,92 +1,89 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function Header() {
-  const router = useRouter();
-  const [email, setEmail] = useState<string | null>(null);
-  const authed = !!email;
+export default function SignInPage() {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
 
-  // Watch auth state
-  useEffect(() => {
-    let active = true;
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErr('');
+    setMsg('');
+    setLoading(true);
 
-    async function load() {
-      const { data } = await supabase.auth.getSession();
-      if (!active) return;
-      setEmail(data.session?.user?.email ?? null);
+    try {
+      if (mode === 'signin') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setMsg('Signed in! Taking you home…');
+        window.location.href = '/';
+      } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        setMsg('Check your email to confirm your account, then sign in.');
+        setEmail('');
+        setPassword('');
+      }
+    } catch (e: any) {
+      setErr(e.message ?? 'Something went wrong.');
+    } finally {
+      setLoading(false);
     }
-    load();
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user?.email ?? null);
-    });
-
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push('/');       // go home
-    router.refresh();       // refresh UI
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo / title */}
+    <main className="max-w-md mx-auto mt-16 p-6 border rounded-xl bg-white shadow">
+      <h1 className="text-2xl font-semibold">
+        {mode === 'signin' ? 'Sign in' : 'Create account'}
+      </h1>
+
+      <form onSubmit={handleSubmit} className="mt-6 grid gap-3">
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border rounded-lg px-3 py-2"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border rounded-lg px-3 py-2"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
         <button
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => router.push('/')}
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
         >
-          <div className="w-9 h-9 rounded-2xl bg-black text-white grid place-items-center font-bold">
-            YC
-          </div>
-          <div className="text-left">
-            <div className="font-semibold leading-none">You need, I can</div>
-            <div className="text-xs text-gray-500 leading-none">
-              Local help. Real people. Prices upfront.
-            </div>
-          </div>
+          {loading ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Sign up'}
         </button>
 
-        {/* Right side nav */}
-        <nav className="flex items-center gap-2">
-          <Link
-            href="/post"
-            className="px-3 py-2 rounded-xl bg-black text-white"
-          >
-            Post
-          </Link>
+        {err && <p className="text-red-600 text-sm">{err}</p>}
+        {msg && <p className="text-green-700 text-sm">{msg}</p>}
+      </form>
 
-          {!authed ? (
-            <Link
-              href="/signin"
-              className="px-3 py-2 rounded-xl border border-gray-300"
-            >
-              Sign in
-            </Link>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:block text-sm text-gray-600">
-                {email}
-              </span>
-              <button
-                onClick={handleSignOut}
-                className="px-3 py-2 rounded-xl border border-gray-300"
-              >
-                Sign out
-              </button>
-            </div>
-          )}
-        </nav>
+      <div className="mt-4 text-sm">
+        {mode === 'signin' ? (
+          <button className="underline" onClick={() => setMode('signup')}>
+            Need an account? Sign up
+          </button>
+        ) : (
+          <button className="underline" onClick={() => setMode('signin')}>
+            Already have an account? Sign in
+          </button>
+        )}
       </div>
-    </header>
+    </main>
   );
 }
