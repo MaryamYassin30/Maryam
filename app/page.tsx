@@ -102,20 +102,27 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/posts", { cache: "no-store" });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "Failed to load posts");
-        setItems(json.items || []);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  (async () => {
+    try {
+      const res = await fetch("/api/posts", { cache: "no-store" });
+
+      // ✅ Check status first, then parse
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`API ${res.status}: ${txt || "Failed to load posts"}`);
       }
-    })();
-  }, []);
+
+      const json = await res.json();
+      setItems(json.items || []);
+    } catch (e: any) {
+      setError(e.message || "Failed to load posts");
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
+
 
   return (
     <div className="min-h-screen bg-white">
