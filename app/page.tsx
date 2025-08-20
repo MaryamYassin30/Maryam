@@ -130,22 +130,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-black text-white grid place-items-center font-bold">YC</div>
-            <div>
-              <h1 className="font-semibold">You need, I can</h1>
-              <p className="text-xs text-gray-500">Local help. Real people. Prices upfront.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="rounded-lg border px-3 py-1.5 text-sm">Sign in</button>
-            <button className="rounded-lg bg-black text-white px-3 py-1.5 text-sm">+ Post</button>
-          </div>
-        </div>
-      </header>
+
 
       {/* Search & categories */}
       <section className="mx-auto max-w-6xl px-4 py-4">
