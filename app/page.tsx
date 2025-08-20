@@ -1,9 +1,14 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
 import { Search, Filter, Info, MapPin, Star, MessageSquare } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  { auth: { persistSession: false } }
+);
 
 // ---------- Types ----------
 interface CategoryChipProps { label: string; active?: boolean; onClick: () => void }
@@ -93,7 +98,6 @@ function NeedCard({ item }: { item: PostItem }) {
 
 // ---------- Page ----------
 export default function Page() {
-
   const [query, setQuery] = useState("");
   const categories = ["All", "Cars & Errands", "Home & Handy", "Tech & Setup", "Beauty & Self-care", "Lessons & Coaching"];
   const [activeCategory, setActiveCategory] = useState(0);
@@ -102,27 +106,27 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-useEffect(() => {
-  (async () => {
-    try {
-      const res = await fetch("/api/posts", { cache: "no-store" });
+  // 🔥 Direct Supabase fetch instead of /api/posts
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("help_posts")
+          .select(
+            "id, city, price, title, description, user_name, user_initials, rating, reviews_count, category"
+          )
+          .order("id", { ascending: false })
+          .limit(30);
 
-      // ✅ Check status first, then parse
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(`API ${res.status}: ${txt || "Failed to load posts"}`);
+        if (error) throw error;
+        setItems(data || []);
+      } catch (e: any) {
+        setError(e.message || "Failed to load posts");
+      } finally {
+        setLoading(false);
       }
-
-      const json = await res.json();
-      setItems(json.items || []);
-    } catch (e: any) {
-      setError(e.message || "Failed to load posts");
-    } finally {
-      setLoading(false);
-    }
-  })();
-}, []);
-
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -168,7 +172,7 @@ useEffect(() => {
       <section className="mx-auto max-w-6xl px-4 mb-4">
         <div className="rounded-lg bg-gray-50 border px-3 py-2 text-sm text-gray-700 flex items-center gap-2">
           <Info className="w-4 h-4" />
-          Meet in public places when possible. Payments handled off‑platform — verify details before committing.
+          Meet in public places when possible. Payments handled off-platform — verify details before committing.
         </div>
       </section>
 
