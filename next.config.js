@@ -2,9 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    appDir: true,   // 👈 tells Vercel to use App Router only
-  },
+  experimental: { typedRoutes: true, appDir: true },
 };
-
 module.exports = nextConfig;
