@@ -1,24 +1,9 @@
+// app/layout.tsx
 // trigger redeploy
 
 import type { Metadata } from "next";
-import "./globals.css";
 import Link from "next/link";
-// ...
-<div className="flex items-center gap-2">
-  <Link
-    href="/signin"
-    className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
-  >
-    Sign in
-  </Link>
-  <Link
-    href="/post"
-    className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:bg-gray-800"
-  >
-    + Post
-  </Link>
-</div>
-
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "You need, I can",
@@ -49,14 +34,20 @@ export default function RootLayout({
               </div>
             </div>
 
-            {/* Right side: actions */}
+            {/* Right side: actions (as real links) */}
             <div className="flex items-center gap-2">
-              <button className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">
+              <Link
+                href="/signin"
+                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+              >
                 Sign in
-              </button>
-              <button className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:bg-gray-800">
+              </Link>
+              <Link
+                href="/post"
+                className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:bg-gray-800"
+              >
                 + Post
-              </button>
+              </Link>
             </div>
           </div>
         </header>
